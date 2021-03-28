@@ -19,7 +19,7 @@ sick = pickle.load(sickFile)
 #print(timeSick)
 #print(sick)
 
-sliceSize = 16
+sliceSize = 64
 slices = []
 sickSlices = []
 

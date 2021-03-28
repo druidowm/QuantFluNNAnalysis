@@ -159,6 +159,66 @@ def getSick(symptoms):
 
     return (startTime,times2,sick2)
 
+def readUserData(user):
+    heartTimes = []
+    sickTimes = []
+    sick = []
+    heartRates = []
+    heartStart = []
+    sickStart = None
+
+    heartMonitor = []
+
+    print(user["json_path"])
+
+
+    try:
+        data = readInternetJson("https://quantifiedflu.org"+user["json_path"])
+    except:
+        return ([],[],[],[], [],[],[])
+    print(user["member_id"])
+    for point in data:
+        if point == "fitbit_intraday" or point == "fitbit_summary" or point == "apple_health_summary" or point == "garmin_heartrate" or point == "googlefit_heartrate" or point == "oura_sleep_5min" or point == "oura_sleep_summary":
+            if data[point] != None:
+                if point == "oura_sleep_5min" or point == "apple_health_summary":
+                    newHeartStart, newHeartTimes, newHeartRates = readHeartRate(data[point], True)
+                else:
+                    newHeartStart, newHeartTimes, newHeartRates = readHeartRate(data[point])
+
+                if newHeartStart != 0:
+                    heartStart.append(newHeartStart)
+                    heartTimes.append(newHeartTimes)
+                    heartRates.append(newHeartRates)
+
+                    heartMonitor.append(point)
+
+        elif point == "symptom_report":
+            sickStart, sickTimes,sick = getSick(data[point])
+    
+    return (heartTimes,heartRates,heartStart,heartMonitor, sickTimes,sick,sickStart)
+
+
+def combineData(times1, times2, rates1, rates2):
+    times = []
+    heart = []
+    for i in range(min(min(times1),min(times2)),max(max(times1),max(times2))+1):
+        times.append(i)
+        if i in times1:
+            if rates1[i-times1[0]] != 0:
+                if i in times2 and rates2[i-times2[0]] != 0:
+                    heart.append((rates1[i-times1[0]]+rates2[i-times2[0]])/2)
+                else:
+                    heart.append(rates1[i-times1[0]])
+            else:
+                if i in times2:
+                    heart.append(rates2[i-times2[0]])
+                else:
+                    heart.append(rates1[i-times1[0]])
+        else:
+            heart.append(rates2[i-times2[0]])
+    return (times,heart)
+
+
 def getData(links):
     metaData = [readInternetJson(link) for link in links]
     userTimes = []
@@ -166,46 +226,14 @@ def getData(links):
     newSickTimes = []
     newSick = []
 
-    for item in metaData:
+    for source in metaData:
         index = 0
-        for item2 in item:
-            #print("hi")
-            #print(index)
-            heartTimes = []
-            sickTimes = []
-            sick = []
-            heartRates = []
-            heartStart = []
-            sickStart = None
-
+        for user in source:
             newTimes = []
             newHearts = []
 
-            heartMonitor = []
-
-            data = readInternetJson("https://quantifiedflu.org"+item2["json_path"])
-            print(item2["member_id"])
-            for point in data:
-                if point == "fitbit_intraday" or point == "fitbit_summary" or point == "apple_health_summary" or point == "garmin_heartrate" or point == "googlefit_heartrate" or point == "oura_sleep_5min" or point == "oura_sleep_summary":
-                    if data[point] != None:
-                        if point == "oura_sleep_5min" or point == "apple_health_summary":
-                            newHeartStart, newHeartTimes, newHeartRates = readHeartRate(data[point], True)
-                        else:
-                            newHeartStart, newHeartTimes, newHeartRates = readHeartRate(data[point])
-
-                        if newHeartStart != 0:
-                            heartStart.append(newHeartStart)
-                            heartTimes.append(newHeartTimes)
-                            heartRates.append(newHeartRates)
-
-                            heartMonitor.append(point)
-
-                elif point == "symptom_report":
-                    sickStart, sickTimes,sick = getSick(data[point])
-
-                else:
-                    print("here")
-                    print(point)
+            heartTimes,heartRates,heartStart,heartMonitor, sickTimes,sick,sickStart = readUserData(user)
+            #print(heartTimes)
 
             if len(heartTimes) > 0 and len(sickTimes) > 0:
                 timeDiff = [round((heartStart[i]-sickStart).total_seconds()/86400.0) for i in range(len(heartStart))]
@@ -213,7 +241,7 @@ def getData(links):
                     for j in range(len(heartTimes[i])):
                         heartTimes[i][j]+=timeDiff[i]
 
-                    plt.plot(heartTimes[i], heartRates[i], label = heartMonitor[i])
+                    #plt.plot(heartTimes[i], heartRates[i], label = heartMonitor[i])
 
                 newSickTimes.append(sickTimes)
                 newSick.append(sick)
@@ -225,21 +253,7 @@ def getData(links):
                         if heartMonitor[i] == "fitbit_summary":
                             index2 = i
                     
-                    fitbitTimes = []
-                    fitbitHeart = []
-                    for i in range(min(min(heartTimes[index1]),min(heartTimes[index2])),max(max(heartTimes[index1]),max(heartTimes[index2]))+1):
-                        fitbitTimes.append(i)
-                        if i in heartTimes[index1] and heartRates[index1][i-heartTimes[index1][0]] != 0:
-                            if i in heartTimes[index2] and heartRates[index2][i-heartTimes[index2][0]] != 0:
-                                fitbitHeart.append((heartRates[index1][i-heartTimes[index1][0]]+heartRates[index2][i-heartTimes[index2][0]])/2)
-                            else:
-                                fitbitHeart.append(heartRates[index1][i-heartTimes[index1][0]])
-                        else:
-                            fitbitHeart.append(heartRates[index2][i-heartTimes[index2][0]])
-
-                    print("fitbit")
-                    print(fitbitTimes)
-                    print(fitbitHeart)
+                    fitbitTimes,fitbitHeart = combineData(heartTimes[index1], heartTimes[index2], heartRates[index1], heartRates[index2])
 
                     newTimes.append(fitbitTimes)
                     newHearts.append(fitbitHeart)
@@ -263,22 +277,7 @@ def getData(links):
                         if heartMonitor[i] == "oura_sleep_summary":
                             index2 = i
                     
-                    ouraTimes = []
-                    ouraHeart = []
-                    for i in range(min(min(heartTimes[index1]),min(heartTimes[index2])),max(max(heartTimes[index1]),max(heartTimes[index2]))+1):
-                        ouraTimes.append(i)
-                        print(heartRates[index2][i-heartTimes[index2][0]])
-                        if i in heartTimes[index1] and heartRates[index1][i-heartTimes[index1][0]] != 0:
-                            if i in heartTimes[index2] and heartRates[index2][i-heartTimes[index2][0]] != 0:
-                                ouraHeart.append((heartRates[index1][i-heartTimes[index1][0]]+heartRates[index2][i-heartTimes[index2][0]])/2)
-                            else:
-                                ouraHeart.append(heartRates[index1][i-heartTimes[index1][0]])
-                        else:
-                            ouraHeart.append(heartRates[index2][i-heartTimes[index2][0]])
-
-                    #print("oura")
-                    #print(ouraTimes)
-                    #print(ouraHeart)
+                    ouraTimes,ouraHeart = combineData(heartTimes[index1], heartTimes[index2], heartRates[index1], heartRates[index2])
                     
                     newTimes.append(ouraTimes)
                     newHearts.append(ouraHeart)
@@ -323,11 +322,11 @@ def getData(links):
                 #    plt.plot(newTimes[i], newHearts[i], label = "new"+str(i+1))
 
                 #plt.plot(sickTimes, sick, label = "Sick")
-                plt.legend()
-                plt.title("Member "+str(item2["member_id"]))
-                plt.xlabel("Day")
-                plt.ylabel("Heart Rate")
-                plt.show()
+                #plt.legend()
+                #plt.title("Member "+str(user["member_id"]))
+                #plt.xlabel("Day")
+                #plt.ylabel("Heart Rate")
+                #plt.show()
                 #for i in range(len(heartTimes)-16):
 
 

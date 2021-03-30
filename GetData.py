@@ -332,16 +332,16 @@ def getData(links):
 
             index += 1
     
-    fileTime = open('user_time.usrdata', 'wb')
+    fileTime = open('Data/user_time.usrdata', 'wb')
     pickle.dump(userTimes,fileTime)
 
-    fileHeart = open('user_heart.usrdata', 'wb')
+    fileHeart = open('Data/user_heart.usrdata', 'wb')
     pickle.dump(userHearts,fileHeart)
 
-    fileTimeSick = open('user_time_sick.usrdata', 'wb')
+    fileTimeSick = open('Data/user_time_sick.usrdata', 'wb')
     pickle.dump(newSickTimes,fileTimeSick)
 
-    fileSick = open('user_sick.usrdata', 'wb')
+    fileSick = open('Data/user_sick.usrdata', 'wb')
     pickle.dump(newSick,fileSick)
 
 #getSick(readInternetJson("https://quantifiedflu.org/report/list/member/05321037.json")["symptom_report"])

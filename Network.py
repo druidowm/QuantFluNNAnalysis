@@ -119,32 +119,3 @@ class Network(nn.Module):
         plt.plot(accuraciesVal,label = "Validation Accuracy")
         plt.legend()
         plt.show()
-
-
-sickFileTrain = open('network_sick_train.data', 'rb')
-sickTrain = pickle.load(sickFileTrain)
-
-sickFileVal = open('network_sick_val.data', 'rb')
-sickVal = pickle.load(sickFileVal)
-
-sickFileTest = open('network_sick_test.data', 'rb')
-sickTest = pickle.load(sickFileTest)
-
-healthyFileTrain = open('network_healthy_train.data', 'rb')
-healthyTrain = pickle.load(healthyFileTrain)
-
-healthyFileVal = open('network_healthy_val.data', 'rb')
-healthyVal = pickle.load(healthyFileVal)
-
-healthyFileTest = open('network_healthy_test.data', 'rb')
-healthyTest = pickle.load(healthyFileTest)
-
-print(sickTrain.shape)
-print(sickVal.shape)
-print(sickTest.shape)
-print(healthyTrain.shape)
-print(healthyVal.shape)
-print(healthyTest.shape)
-
-n = Network()
-n.train(healthyTrain,sickTrain,healthyVal,sickVal,8,0.0001,0.9,1000)

@@ -2,16 +2,16 @@ import pickle
 import torch
 import matplotlib.pyplot as plt
 
-timeFile = open('user_time.usrdata', 'rb')
+timeFile = open('Data/user_time.usrdata', 'rb')
 time = pickle.load(timeFile)
 
-heartFile = open('user_heart.usrdata', 'rb')
+heartFile = open('Data/user_heart.usrdata', 'rb')
 heart = pickle.load(heartFile)
 
-timeSickFile = open('user_time_sick.usrdata', 'rb')
+timeSickFile = open('Data/user_time_sick.usrdata', 'rb')
 timeSick = pickle.load(timeSickFile)
 
-sickFile = open('user_sick.usrdata', 'rb')
+sickFile = open('Data/user_sick.usrdata', 'rb')
 sick = pickle.load(sickFile)
 
 #print(time)
@@ -82,20 +82,20 @@ print(sickTest.shape)
 plt.title("Sick")
 plt.show()
 
-fileSickTrain = open('network_sick_train.data', 'wb')
+fileSickTrain = open('Data/network_sick_train.data', 'wb')
 pickle.dump(sickTrain,fileSickTrain)
 
-fileSickVal = open('network_sick_val.data', 'wb')
+fileSickVal = open('Data/network_sick_val.data', 'wb')
 pickle.dump(sickVal,fileSickVal)
 
-fileSickTest = open('network_sick_test.data', 'wb')
+fileSickTest = open('Data/network_sick_test.data', 'wb')
 pickle.dump(sickTest,fileSickTest)
 
-fileHealthyTrain = open('network_healthy_train.data', 'wb')
+fileHealthyTrain = open('Data/network_healthy_train.data', 'wb')
 pickle.dump(healthyTrain,fileHealthyTrain)
 
-fileHealthyVal = open('network_healthy_val.data', 'wb')
+fileHealthyVal = open('Data/network_healthy_val.data', 'wb')
 pickle.dump(healthyVal,fileHealthyVal)
 
-fileHealthyTest = open('network_healthy_test.data', 'wb')
+fileHealthyTest = open('Data/network_healthy_test.data', 'wb')
 pickle.dump(healthyTest,fileHealthyTest)

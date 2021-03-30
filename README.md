@@ -1,5 +1,5 @@
 # QuantFluNNAnalysis
-This is my code for data processing and neural network training for the QuantifiedFlu project. Below is an overview of what the three key files do.
+This is my code for data processing and training neural networks and other ML models for the QuantifiedFlu project. Below is an overview of what the four key files do.
 
 ## GetData.py
 This file retreives up-to-date heartrate and sickness data from the QuantifiedFlu website.
